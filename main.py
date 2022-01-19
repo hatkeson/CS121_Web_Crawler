@@ -7,6 +7,8 @@ from corpus import Corpus
 from crawler import Crawler
 from frontier import Frontier
 
+# test push
+
 if __name__ == "__main__":
     # Configures basic logging
     logging.basicConfig(format='%(asctime)s (%(name)s) %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
