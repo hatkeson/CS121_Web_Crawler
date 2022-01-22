@@ -2,6 +2,10 @@ import logging
 import re
 from urllib.parse import urlparse
 
+from lxml import etree
+from lxml import html
+from io import StringIO, BytesIO
+
 logger = logging.getLogger(__name__)
 
 class Crawler:
@@ -39,6 +43,27 @@ class Crawler:
 
         Suggested library: lxml
         """
+        #print(url_data)
+
+        doc = html.fromstring(url_data['content'])
+
+        for link in doc.xpath('//a/@href'):
+            print(link)
+
+
+            # combine absolute links. look at make_links_absolute on lxml
+            # look up on #[link]
+            # for every link, we add to outputLinks
+            # TODO: add STATS later
+
+        #link = list(doc.iterlinks())
+        #for element, attribute, link, pos in doc.iterlinks():
+            #print(element)
+        #    print(attribute)
+         #   print(link)
+            #print(pos)
+
+
         outputLinks = []
         return outputLinks
 
