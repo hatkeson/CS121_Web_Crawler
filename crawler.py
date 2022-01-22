@@ -45,15 +45,17 @@ class Crawler:
         """
         #print(url_data)
 
+        outputLinks = []
+
         doc = html.fromstring(url_data['content'])
+        doc = html.make_links_absolute(doc, base_url = url_data['url'])
 
         for link in doc.xpath('//a/@href'):
-            print(link)
+            outputLinks.append(link)
 
-
-            # combine absolute links. look at make_links_absolute on lxml
-            # look up on #[link]
-            # for every link, we add to outputLinks
+            # combine absolute links. look at make_links_absolute on lxml (DONE)
+            # look up on #[link] (DONE)
+            # for every link, we add to outputLinks (DONE)
             # TODO: add STATS later
 
         #link = list(doc.iterlinks())
@@ -63,8 +65,6 @@ class Crawler:
          #   print(link)
             #print(pos)
 
-
-        outputLinks = []
         return outputLinks
 
     def is_valid(self, url):
