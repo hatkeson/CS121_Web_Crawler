@@ -47,7 +47,7 @@ class Crawler:
         # print('Size: ' + str(url_data['size']))
         # print('HTTP code: ' + str(url_data['http_code']))
         # print('is_redirected: ' + str(url_data['is_redirected']))
-        
+
         outputLinks = []
 
         try:
