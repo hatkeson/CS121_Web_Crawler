@@ -43,16 +43,21 @@ class Crawler:
 
         Suggested library: lxml
         """
-        #print(url_data)
-
+        # print('Content Type: ' + str(url_data['content_type']))
+        # print('Size: ' + str(url_data['size']))
+        # print('HTTP code: ' + str(url_data['http_code']))
+        # print('is_redirected: ' + str(url_data['is_redirected']))
+        
         outputLinks = []
 
-        if url_data['content']:
+        try:
             doc = html.fromstring(url_data['content'])
             doc = html.make_links_absolute(doc, base_url = url_data['url'])
 
             for link in doc.xpath('//a/@href'):
                 outputLinks.append(link)
+        except etree.ParserError:
+            print('XML is empty or invalid')
 
             # combine absolute links. look at make_links_absolute on lxml (DONE)
             # look up on #[link] (DONE)
