@@ -47,11 +47,12 @@ class Crawler:
 
         outputLinks = []
 
-        doc = html.fromstring(url_data['content'])
-        doc = html.make_links_absolute(doc, base_url = url_data['url'])
+        if url_data['content']:
+            doc = html.fromstring(url_data['content'])
+            doc = html.make_links_absolute(doc, base_url = url_data['url'])
 
-        for link in doc.xpath('//a/@href'):
-            outputLinks.append(link)
+            for link in doc.xpath('//a/@href'):
+                outputLinks.append(link)
 
             # combine absolute links. look at make_links_absolute on lxml (DONE)
             # look up on #[link] (DONE)
