@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from lxml import etree
 from lxml import html
-from io import StringIO, BytesIO
+import tldextract
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,16 @@ class Crawler:
     def __init__(self, frontier, corpus):
         self.frontier = frontier
         self.corpus = corpus
+
+        # analytics 
+        self.subdomains = {} # (updated in extract_next_links) key: subdomain, value: number of URLs
+        self.outlinks = {} # (updated in extract_next_links) key: URL, value: number of links
+        self.downloaded_URLs = [] # (updated in extract_next_links)
+        self.traps = [] # (updated in is_valid)
+        self.word_count = ("", 0) # (updated in extract_next_links) 0 is URL, 1 is word count
+        self.corpus_words = {} # (updated in extract_next_links)
+
+
 
     def start_crawling(self):
         """
@@ -43,10 +53,6 @@ class Crawler:
 
         Suggested library: lxml
         """
-        # print('Content Type: ' + str(url_data['content_type']))
-        # print('Size: ' + str(url_data['size']))
-        # print('HTTP code: ' + str(url_data['http_code']))
-        # print('is_redirected: ' + str(url_data['is_redirected']))
 
         outputLinks = []
 
@@ -56,6 +62,21 @@ class Crawler:
 
             for link in doc.xpath('//a/@href'):
                 outputLinks.append(link)
+
+            # parse url for first subdomain
+            subd = tldextract.extract(url_data['url'])[0]
+            if subd in self.subdomains:
+                self.subdomains[subd] += 1
+            else:
+                self.subdomains[subd] = 1
+
+            self.outlinks[url_data['url']] = len(outputLinks)
+            self.downloaded_URLs.append(url_data['url'])
+
+
+
+
+
         except etree.ParserError:
             print('XML is empty or invalid')
 
@@ -89,6 +110,7 @@ class Crawler:
                                     + "|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub|dll|cnf|tgz|sha1" \
                                     + "|thmx|mso|arff|rtf|jar|csv" \
                                     + "|rm|smil|wmv|swf|wma|zip|rar|gz|pdf)$", parsed.path.lower())
+            # need to increment the number of 
 
         except TypeError:
             print("TypeError for ", parsed)
