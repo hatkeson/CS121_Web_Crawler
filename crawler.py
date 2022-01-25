@@ -1,6 +1,7 @@
 import logging
 import re
 import PartA
+from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
 from lxml import etree
@@ -59,8 +60,9 @@ class Crawler:
         
         try:
             doc = html.fromstring(url_data['content'])
-            print(url_data['content'].decode('utf-8'))
-            word_freq = PartA.compute_word_frequencies(PartA.tokenize(url_data['content'].decode('utf-8')))
+            page_text = BeautifulSoup(url_data['content'], 'html.parser').get_text()
+            print(page_text)
+            word_freq = PartA.compute_word_frequencies(PartA.tokenize(page_text))
             print(word_freq)
             doc = html.make_links_absolute(doc, base_url = url_data['url'])
 

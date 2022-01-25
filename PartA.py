@@ -65,16 +65,16 @@ def tokenize(doc):
     token_list = []
     try:
         alphanumeric = '''etainoshrdlucmfwygpbvkqjxz'TAOISWCBPHFMDERLNGUKVYJQXZ1234567890'''
-        in_tag = 0 # +1 for "<", -1 for ">"
+        # in_tag = 0 # +1 for "<", -1 for ">"
         for line in doc.splitlines(): # O(k)
             char_list = [] # O(1)
             for char in line: # O(n)
-                if char == '<': 
-                    in_tag += 1
-                elif char == '>':
-                    in_tag -= 1
+                # if char == '<': 
+                #     in_tag += 1
+                # elif char == '>':
+                #     in_tag -= 1
 
-                if char in alphanumeric and in_tag == 0: # O(62) = O(1) worst case, comparing one character to constant list
+                if char in alphanumeric: # O(62) = O(1) worst case, comparing one character to constant list
                     char_list.append(char.lower()) # O(1)
                 elif char_list:
                     token_list.append(char_list) # O(1)
