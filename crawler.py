@@ -1,5 +1,6 @@
 import logging
 import re
+import PartA
 from urllib.parse import urlparse
 
 from lxml import etree
@@ -55,25 +56,29 @@ class Crawler:
         """
 
         outputLinks = []
-
+        
         try:
             doc = html.fromstring(url_data['content'])
+            print(url_data['content'].decode('utf-8'))
+            word_freq = PartA.compute_word_frequencies(PartA.tokenize(url_data['content'].decode('utf-8')))
+            print(word_freq)
             doc = html.make_links_absolute(doc, base_url = url_data['url'])
 
             for link in doc.xpath('//a/@href'):
                 outputLinks.append(link)
 
-            # parse url for first subdomain
+            # URLs per subdomain
             subd = tldextract.extract(url_data['url'])[0]
             if subd in self.subdomains:
                 self.subdomains[subd] += 1
             else:
                 self.subdomains[subd] = 1
 
+            # outlinks per page
             self.outlinks[url_data['url']] = len(outputLinks)
+            # list of downloaded URLs
             self.downloaded_URLs.append(url_data['url'])
-
-
+            # words by frequency
 
 
 

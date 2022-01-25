@@ -44,7 +44,7 @@ def merge(a, first1, last1, first2, last2):
         temp_index += 1
         index += 1
 
-def tokenize(text_file_path):
+def tokenize(doc):
     """k = total number of lines in the file
        m = total number of words in the file
        n = total number of chars in the file
@@ -64,25 +64,31 @@ def tokenize(text_file_path):
        and the remaining characters are tokenized."""
     token_list = []
     try:
-        with open(text_file_path, encoding='utf-8', errors='strict') as f:
-            # search for match in list (sorted by frequency of use)
-            alphanumeric = '''etainoshrdlucmfwygpbvkqjxzTAOISWCBPHFMDERLNGUKVYJQXZ1234567890'''
-            for line in f: # O(k)
-                char_list = [] # O(1)
-                for char in line: # O(n)
-                    if char in alphanumeric: # O(62) = O(1) worst case, comparing one character to constant list
-                        char_list.append(char.lower()) # O(1)
-                    elif char_list:
-                        token_list.append(char_list) # O(1)
-                        char_list = [] # O(1)
+        alphanumeric = '''etainoshrdlucmfwygpbvkqjxz'TAOISWCBPHFMDERLNGUKVYJQXZ1234567890'''
+        in_tag = 0 # +1 for "<", -1 for ">"
+        for line in doc.splitlines(): # O(k)
+            char_list = [] # O(1)
+            for char in line: # O(n)
+                if char == '<': 
+                    in_tag += 1
+                elif char == '>':
+                    in_tag -= 1
+
+                if char in alphanumeric and in_tag == 0: # O(62) = O(1) worst case, comparing one character to constant list
+                    char_list.append(char.lower()) # O(1)
+                elif char_list:
+                    token_list.append(char_list) # O(1)
+                    char_list = [] # O(1)
         i = 0
         token_list_length = len(token_list) # O(1)
         while i < token_list_length: # O(m)
             token_list[i] = ''.join(token_list[i]) # O(n)
+            token_list[i] = token_list[i].strip('\'') # trim tokens with apostrophes at the beginning or end 
+            # NOTE: this obliterates plural possessive: cars' -> cars
             i += 1
 
     except FileNotFoundError:
-        print('Error: "' + str(text_file_path) + '" not found.')
+        print('Error: file not found.')
         return []
     except ValueError:
         print('Encoding Error.')
