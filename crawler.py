@@ -3,6 +3,7 @@ import re
 import PartA
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+import time
 
 from lxml import etree
 from lxml import html
@@ -21,12 +22,11 @@ class Crawler:
         self.corpus = corpus
 
         # analytics 
-        self.subdomains = {} # (updated in extract_next_links) key: subdomain, value: number of URLs
-        self.outlinks = {} # (updated in extract_next_links) key: URL, value: number of links
-        self.downloaded_URLs = [] # (updated in extract_next_links)
-        self.traps = [] # (updated in is_valid)
-        self.word_count = ("", 0) # (updated in extract_next_links) 0 is URL, 1 is word count
-        self.corpus_words = {} # (updated in extract_next_links)
+        self.subdomains = {} # (updated in extract_next_links) key: subdomain, value: number of URLs (DONE)
+        self.most_outlinks = ("",0) # (updated in extract_next_links) key
+        self.downloaded_URLs = {} # (updated in is_valid) key: URL, value: bool - 1 if trap, 0 if not
+        self.longest_page = ("", 0) # (updated in extract_next_links) 0 is URL, 1 is word count (DONE)
+        self.corpus_word_freq = {} # (updated in extract_next_links)
 
 
 
@@ -61,9 +61,15 @@ class Crawler:
         try:
             doc = html.fromstring(url_data['content'])
             page_text = BeautifulSoup(url_data['content'], 'html.parser').get_text()
-            print(page_text)
-            word_freq = PartA.compute_word_frequencies(PartA.tokenize(page_text))
-            print(word_freq)
+            token_list = PartA.tokenize(page_text)
+            page_length = len(token_list)
+
+            # get longest page
+            if page_length > self.longest_page[1]:
+                self.longest_page = (url_data['url'], page_length)
+            
+            page_word_freq = PartA.compute_word_frequencies(token_list)
+
             doc = html.make_links_absolute(doc, base_url = url_data['url'])
 
             for link in doc.xpath('//a/@href'):
@@ -76,28 +82,20 @@ class Crawler:
             else:
                 self.subdomains[subd] = 1
 
-            # outlinks per page
-            self.outlinks[url_data['url']] = len(outputLinks)
-            # list of downloaded URLs
-            self.downloaded_URLs.append(url_data['url'])
-            # words by frequency
+            # max valid outlinks
+            if len(outputLinks) > self.most_outlinks[1]:
+                self.most_outlinks = (url_data['url'], len(outputLinks))
 
+            # add page's words to corpus frequency count
+            for key in page_word_freq:
+                if key in self.corpus_word_freq:
+                    self.corpus_word_freq[key] += page_word_freq[key]
+                else:
+                    self.corpus_word_freq[key] = page_word_freq[key]
 
 
         except etree.ParserError:
             print('XML is empty or invalid')
-
-            # combine absolute links. look at make_links_absolute on lxml (DONE)
-            # look up on #[link] (DONE)
-            # for every link, we add to outputLinks (DONE)
-            # TODO: add STATS later
-
-        #link = list(doc.iterlinks())
-        #for element, attribute, link, pos in doc.iterlinks():
-            #print(element)
-        #    print(attribute)
-         #   print(link)
-            #print(pos)
 
         return outputLinks
 
@@ -116,7 +114,7 @@ class Crawler:
             #determine the valid url
 
             #traps vs not-traps
-            self.word_count = PartA.tokenize(parsed)
+            # self.word_count = PartA.tokenize(parsed)
 
 
             return ".ics.uci.edu" in parsed.hostname \
@@ -131,3 +129,11 @@ class Crawler:
             print("TypeError for ", parsed)
             return False
 
+    def write_analytics_file(self):
+        with open('analytics.txt', 'w') as analytics:
+            analytics.write('List of Subdomains with Number of URLs\n')
+            for sub in self.subdomains:
+                print(sub + '\t' + str(self.subdomains[sub]))
+            analytics.write('\nPage with Most Valid Outlinks\n')
+            analytics.write(str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1]))
+            analytics.write('\nDownloaded URLs and Traps (1 if trap, 0 if not)\n')
