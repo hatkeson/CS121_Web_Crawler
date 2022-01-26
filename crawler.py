@@ -28,8 +28,6 @@ class Crawler:
         self.longest_page = ("", 0) # (updated in extract_next_links) 0 is URL, 1 is word count (DONE)
         self.corpus_word_freq = {} # (updated in extract_next_links)
 
-
-
     def start_crawling(self):
         """
         This method starts the crawling process which is scraping urls from the next available link in frontier and adding
@@ -93,7 +91,6 @@ class Crawler:
                 else:
                     self.corpus_word_freq[key] = page_word_freq[key]
 
-
         except etree.ParserError:
             print('XML is empty or invalid')
 
@@ -130,10 +127,32 @@ class Crawler:
             return False
 
     def write_analytics_file(self):
+        stop_words = []
+        with open('stopwords.txt') as st:
+            stop_words = PartA.tokenize(st.read())
+
+
         with open('analytics.txt', 'w') as analytics:
+            file_content = 'List of Subdomains with Number of URLs\n'
+            for sub in self.subdomains:
+                file_content += sub + '\t' + str(self.subdomains[sub]) + '\n'
+            file_content += ('\nPage with Most Valid Outlinks\n' 
+                + str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1])
+                + '\nDownloaded URLs and Traps (1 if trap, 0 if not)\n'
+                + '\n50 Most Common Words (Excluding Stop Words)')
+            word_counter = 0
+            for word in self.corpus_word_freq:
+                if word not in stop_words:
+                    file_content += word + '\t' + stop_words[word] + '\n'
+                    word_counter += 1
+
+
+
             analytics.write('List of Subdomains with Number of URLs\n')
             for sub in self.subdomains:
                 print(sub + '\t' + str(self.subdomains[sub]))
             analytics.write('\nPage with Most Valid Outlinks\n')
             analytics.write(str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1]))
-            analytics.write('\nDownloaded URLs and Traps (1 if trap, 0 if not)\n')
+            analytics.write('\nDownloaded URLs and Traps (1 if trap, 0 if not)\n') 
+            # TODO
+            analytics.write('\n')
