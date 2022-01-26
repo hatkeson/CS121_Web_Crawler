@@ -31,6 +31,11 @@ class Crawler:
         self.longest_page = ("", 0)  # (updated in extract_next_links) 0 is URL, 1 is word count (DONE)
         self.corpus_word_freq = {}  # (updated in extract_next_links)
 
+        self.stopwords = []
+        with open('stopwords.txt') as file:
+            for line in file:
+                self.stopwords.append(line.rstrip())
+
     def start_crawling(self):
         """
         This method starts the crawling process which is scraping urls from the next available link in frontier and adding
@@ -89,10 +94,11 @@ class Crawler:
 
             # add page's words to corpus frequency count
             for key in page_word_freq:
-                if key in self.corpus_word_freq:
-                    self.corpus_word_freq[key] += page_word_freq[key]
-                else:
-                    self.corpus_word_freq[key] = page_word_freq[key]
+                if key not in self.stopwords:
+                    if key in self.corpus_word_freq:
+                        self.corpus_word_freq[key] += page_word_freq[key]
+                    else:
+                        self.corpus_word_freq[key] = page_word_freq[key]
         
             self.write_analytics_file()
 
@@ -176,27 +182,20 @@ class Crawler:
             return False
 
     def write_analytics_file(self):
-        stop_words = []
-        with open('stopwords.txt') as st:
-            stop_words = PartA.tokenize(st.read())
 
         with open('analytics.txt', 'w') as analytics:
             file_content = 'List of Subdomains with Number of URLs\n'
             for sub in self.subdomains:
                 file_content += sub + '\t' + str(self.subdomains[sub]) + '\n'
             file_content += ('\nPage with Most Valid Outlinks\n' 
-                + str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1])
+                + str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1]) + '\n'
                 + '\nDownloaded URLs and Traps (1 if trap, 0 if not)\n'
                 + '\n50 Most Common Words (Excluding Stop Words)\n')
-            # remove stop words from dictionary
-            for word in self.corpus_word_freq:
-                if word in stop_words:
-                    del self.corpus_word_freq[word]
             # get 50 most common words
             most_common = dict(sorted(self.corpus_word_freq.items(), key = itemgetter(1), reverse = True)[:50])
             for word in most_common:
                 file_content += word + '\t' + str(most_common[word]) + '\n' 
-            analytics.write(file_content)       
+            analytics.write(file_content)
           
 
 # #repeating direcotries
