@@ -104,6 +104,8 @@ class Crawler:
 
         except etree.ParserError:
             print('XML is empty or invalid')
+        except ValueError:
+            print('Encoding Error')
 
         return outputLinks
 
@@ -120,9 +122,9 @@ class Crawler:
 
             tokenlist = PartA.tokenize(parsed.path)
             tokendict = PartA.compute_word_frequencies(tokenlist)
-            print(parsed)
-            print(tokenlist)
-            print(PartA.compute_word_frequencies(tokenlist))
+            #print(parsed)
+            #print(tokenlist)
+            #print(PartA.compute_word_frequencies(tokenlist))
 
             # check long messy strings:
             if len(parsed.path) > 100:
@@ -156,12 +158,13 @@ class Crawler:
             #has_repeated_query_params
                 querylist = PartA.tokenize(parsed.query)
                 querydict = PartA.compute_word_frequencies(querylist)
-                print(querylist)
-                print(querydict)
+                #print(querylist)
+                #print(querydict)
 
                 for key, value in querydict.items():
                     if value >= 2:
-                        print(key)
+                        pass
+                        #print(key)
                         # update self.traps
                         # return False
 
