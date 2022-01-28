@@ -94,7 +94,7 @@ class Crawler:
 
             # add page's words to corpus frequency count
             for key in page_word_freq:
-                if key not in self.stopwords:
+                if key not in self.stopwords and (len(key) > 1 or (str.isdigit(key) and len(key) > 2)):
                     if key in self.corpus_word_freq:
                         self.corpus_word_freq[key] += page_word_freq[key]
                     else:
@@ -192,8 +192,12 @@ class Crawler:
                 file_content += sub + '\t' + str(self.subdomains[sub]) + '\n'
             file_content += ('\nPage with Most Valid Outlinks\n' 
                 + str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1]) + '\n'
-                + '\nDownloaded URLs and Traps (1 if trap, 0 if not)\n'
-                + '\n50 Most Common Words (Excluding Stop Words)\n')
+                + '\nDownloaded URLs and Traps (1 if trap, 0 if not)\n')
+            file_content += ('\nLongest Page by Words\n'
+                + str(self.longest_page[0]) + '\t' + str(self.longest_page[1]) + '\n')
+            for url in self.downloaded_URLs:
+                file_content += url + '\t' + str(self.downloaded_URLs[url]) + '\n'
+            file_content += '\n50 Most Common Words (Excluding Stop Words)\n'
             # get 50 most common words
             most_common = dict(sorted(self.corpus_word_freq.items(), key = itemgetter(1), reverse = True)[:50])
             for word in most_common:
