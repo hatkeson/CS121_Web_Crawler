@@ -239,12 +239,3 @@ class Crawler:
             for word in most_common:
                 file_content += word + '\t' + str(most_common[word]) + '\n' 
             analytics.write(file_content)
-          
-
-# #repeating direcotries
-# test = Crawler
-# test.is_valid(test,"https://www.google.com/maps/place/Amen+Acai/maps/maps/@33.8518045,-118.0091297,12z/data=!4m9!1m2!2m1!1samen+acai!3m5!1s0x80dcd7b4894c09c7:0x809dcd5c1f96c4df!8m2!3d33.8582532!4d-117.9216658!15sCglhbWVuIGFjYWlaCyIJYW1lbiBhY2FpkgEKanVpY2Vfc2hvcA")
-
-
-# #repeating query parameter
-# test.is_valid(test,"https://example.com/page?filter=red&filter=red")
