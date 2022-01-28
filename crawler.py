@@ -72,17 +72,26 @@ class Crawler:
 
             # get longest page
             if page_length > self.longest_page[1]:
-                self.longest_page = (url_data['url'], page_length)
+                if url_data['is_redirected']:
+                    self.longest_page = (url_data['final_url'], page_length)
+                else:
+                    self.longest_page = (url_data['url'], page_length)
 
             page_word_freq = PartA.compute_word_frequencies(token_list)
 
-            doc = html.make_links_absolute(doc, base_url=url_data['url'])
+            if url_data['is_redirected']:
+                doc = html.make_links_absolute(doc, base_url=url_data['final_url'])
+            else:
+                doc = html.make_links_absolute(doc, base_url=url_data['url'])
 
             for link in doc.xpath('//a/@href'):
                 outputLinks.append(link)
 
             # URLs per subdomain
-            subd = tldextract.extract(url_data['url'])[0]
+            if url_data['is_redirected']:
+                subd = tldextract.extract(url_data['final_url'])[0]
+            else:
+                subd = tldextract.extract(url_data['url'])[0]
             if subd in self.subdomains:
                 self.subdomains[subd] += 1
             else:
@@ -90,7 +99,10 @@ class Crawler:
 
             # max valid outlinks
             if len(outputLinks) > self.most_outlinks[1]:
-                self.most_outlinks = (url_data['url'], len(outputLinks))
+                if url_data['is_redirected']:
+                    self.most_outlinks = (url_data['final_url'], len(outputLinks))
+                else:
+                    self.most_outlinks = (url_data['url'], len(outputLinks))
 
             # add page's words to corpus frequency count
             for key in page_word_freq:
