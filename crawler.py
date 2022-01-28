@@ -115,7 +115,7 @@ class Crawler:
                 subd = tldextract.extract(url_data['url'])[0]
             if subd in self.subdomains:
                 self.subdomains[subd] += 1
-            else:
+            elif subd != "www":
                 self.subdomains[subd] = 1
 
             # add page's words to corpus frequency count
