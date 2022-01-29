@@ -23,7 +23,6 @@ class Crawler:
         self.frontier = frontier
         self.corpus = corpus
 
-
         # analytics
         self.subdomains = {}  # (updated in extract_next_links) key: subdomain, value: number of URLs (DONE)
         self.most_outlinks = ("", 0)  # (updated in start_crawling) key
@@ -79,7 +78,8 @@ class Crawler:
         try:
             # if url ends with any of these, no need to crawl
             str_url = str(url_data['url'])
-            if str_url.endswith('jpg') or str_url.endswith('png') or str_url.endswith('jpeg') or str_url.endswith('gif'):
+            if str_url.endswith('jpg') or str_url.endswith('png') or str_url.endswith('jpeg') or str_url.endswith(
+                    'gif'):
                 return []
 
             # if content is None, http_code is 404, or size == 0
@@ -115,7 +115,7 @@ class Crawler:
                 subd = tldextract.extract(url_data['url'])[0]
             if subd in self.subdomains:
                 self.subdomains[subd] += 1
-            else:
+            elif subd != "www":
                 self.subdomains[subd] = 1
 
             # add page's words to corpus frequency count
@@ -125,7 +125,7 @@ class Crawler:
                         self.corpus_word_freq[key] += page_word_freq[key]
                     else:
                         self.corpus_word_freq[key] = page_word_freq[key]
-        
+
             # self.write_analytics_file()
 
         except etree.ParserError:
@@ -155,15 +155,6 @@ class Crawler:
                 self.downloaded_URLs[url] = 1
                 return False
 
-
-            # TODO: [Done] Calendar - look for frequencies of words in a word-set (also queries)
-            # TODO: [Done] jpg, png, img, or other image extensions
-            # TODO: [Done] if http_code == 404
-            # TODO: [Done] if doesnt exist: if content, content_empty is None or size == 0
-            # TODO: [Done] ask if compute_word is sorted, we dont want to do O(n) everytime
-            # TODO: [Done] move outputLinks above to only add VALID outputLinks
-            # TODO: www is not a subdomain
-
             # contains fragment
             if "#" in url:
                 # update self.traps
@@ -171,7 +162,7 @@ class Crawler:
                 return False
 
             # keywords specific traps in query:
-            if "jession" in parsed.query or "sessid" in parsed.query or "sid" in parsed.query\
+            if "jession" in parsed.query or "sessid" in parsed.query or "sid" in parsed.query \
                     or "day" in parsed.query or "date" in parsed.query or "week" in parsed.query \
                     or "month" in parsed.query or "year" in parsed.query:
                 # update self.traps
@@ -226,16 +217,16 @@ class Crawler:
             file_content = 'List of Subdomains with Number of URLs\n'
             for sub in self.subdomains:
                 file_content += sub + '\t' + str(self.subdomains[sub]) + '\n'
-            file_content += ('\nPage with Most Valid Outlinks\n' 
-                + str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1]) + '\n')
+            file_content += ('\nPage with Most Valid Outlinks\n'
+                             + str(self.most_outlinks[0]) + '\t' + str(self.most_outlinks[1]) + '\n')
             file_content += ('\nLongest Page by Words\n'
-                + str(self.longest_page[0]) + '\t' + str(self.longest_page[1]) + '\n'
-                + '\nDownloaded URLs and Traps (1 if trap, 0 if not)\n')
+                             + str(self.longest_page[0]) + '\t' + str(self.longest_page[1]) + '\n'
+                             + '\nDownloaded URLs and Traps (1 if trap, 0 if not)\n')
             for url in self.downloaded_URLs:
                 file_content += url + '\t' + str(self.downloaded_URLs[url]) + '\n'
             file_content += '\n50 Most Common Words (Excluding Stop Words)\n'
             # get 50 most common words
-            most_common = dict(sorted(self.corpus_word_freq.items(), key = itemgetter(1), reverse = True)[:50])
+            most_common = dict(sorted(self.corpus_word_freq.items(), key=itemgetter(1), reverse=True)[:50])
             for word in most_common:
-                file_content += word + '\t' + str(most_common[word]) + '\n' 
+                file_content += word + '\t' + str(most_common[word]) + '\n'
             analytics.write(file_content)
